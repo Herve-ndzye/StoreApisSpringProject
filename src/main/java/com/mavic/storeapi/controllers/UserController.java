@@ -2,6 +2,7 @@ package com.mavic.storeapi.controllers;
 
 import com.mavic.storeapi.dtos.UserDto;
 import com.mavic.storeapi.entities.User;
+import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,21 +21,22 @@ import java.util.Optional;
 @RequestMapping("/users")
 public class UserController {
     private UserRepository userRepository;
+    private UserMapper userMapper;
 
     @GetMapping
     public Iterable<UserDto> getAllUsers() {
         return userRepository.findAll()
                 .stream()
-                .map(user -> new UserDto(user.getId,user.getName,user.getEmail))
+                .map(user -> userMapper.toDto(user))
                 .toList();
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id){
+    public ResponseEntity<UserDto> getUser(@PathVariable Long id){
         var user =  userRepository.findById(id).orElse(null);
         if(user == null){
             return ResponseEntity.notFound().build();
         }
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(userMapper.toDto(user));
     }
 }
