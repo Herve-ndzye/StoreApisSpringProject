@@ -1,12 +1,14 @@
 package com.mavic.storeapi.controllers;
 
 import com.mavic.storeapi.dtos.UserDto;
+import com.mavic.storeapi.dtos.UserRegisterRequest;
 import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Set;
 
@@ -34,5 +36,16 @@ public class UserController {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(userMapper.toDto(user));
+    }
+
+    @PostMapping
+    public ResponseEntity<UserDto> createUser(
+            @RequestBody UserRegisterRequest user,
+            UriComponentsBuilder uriBuilder
+    ){
+        var newUser = userMapper.toEntity(user);
+        userRepository.save(newUser);
+        var uri = uriBuilder.path("/users/{id}").buildAndExpand(newUser.getId()).toUri();
+        return ResponseEntity.created(uri).body(userMapper.toDto(newUser));
     }
 }
