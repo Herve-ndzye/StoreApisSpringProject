@@ -1,11 +1,12 @@
 package com.mavic.storeapi.controllers;
 
+import com.mavic.storeapi.dtos.ChangePasswordRequest;
 import com.mavic.storeapi.dtos.UserDto;
 import com.mavic.storeapi.dtos.UserRegisterRequest;
 import com.mavic.storeapi.dtos.UserUpdateDto;
-import com.mavic.storeapi.dtos.ChangePasswordRequest;
 import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
+import jakarta.validation.Valid;
 import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.util.Map;
 import java.util.Set;
 
 @AllArgsConstructor
@@ -42,10 +44,16 @@ public class UserController {
     }
 
     @PostMapping
-    public ResponseEntity<UserDto> createUser(
-            @RequestBody UserRegisterRequest user,
+    public ResponseEntity<?> registerUser(
+            @Valid @RequestBody UserRegisterRequest user,
             UriComponentsBuilder uriBuilder
     ){
+        if(userRepository.existsUserByEmail(user.getEmail())){
+            return ResponseEntity.badRequest().body(
+                    Map.of("email","Email is already registered")
+            );
+        }
+
         var newUser = userMapper.toEntity(user);
         userRepository.save(newUser);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(newUser.getId()).toUri();
