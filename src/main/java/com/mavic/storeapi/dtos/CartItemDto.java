@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 public class CartItemDto {
-    private CartProductDto products;
+    private CartProductDto product;
     private Integer quantity;
     private BigDecimal totalPrice = BigDecimal.ZERO;
 
