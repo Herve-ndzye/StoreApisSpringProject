@@ -19,5 +19,4 @@ public interface CartMapper {
     @Mapping(target = "items",source = "cartItems")
     CartDto toDto(Cart cart);
 
-    CartProductDto toCartProductDto(Product product);
 }
