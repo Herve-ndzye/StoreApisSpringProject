@@ -10,10 +10,12 @@ import com.mavic.storeapi.exceptions.CartNotFoundException;
 import com.mavic.storeapi.exceptions.ProductNotFoundException;
 import com.mavic.storeapi.repositories.CartRepository;
 import com.mavic.storeapi.repositories.ProductRepository;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import java.util.UUID;
 
 @Service
+@AllArgsConstructor
 public class CartService {
     private CartRepository cartRepository;
     private ProductRepository productRepository;
