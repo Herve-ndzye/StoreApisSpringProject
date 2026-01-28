@@ -1,9 +1,7 @@
 package com.mavic.storeapi.controllers;
 
-import com.mavic.storeapi.dtos.ChangePasswordRequest;
-import com.mavic.storeapi.dtos.UserDto;
-import com.mavic.storeapi.dtos.UserRegisterRequest;
-import com.mavic.storeapi.dtos.UserUpdateDto;
+import com.mavic.storeapi.dtos.*;
+import com.mavic.storeapi.exceptions.InvalidPasswordException;
 import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -11,6 +9,7 @@ import lombok.AllArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -23,6 +22,8 @@ import java.util.Set;
 public class UserController {
     private UserRepository userRepository;
     private UserMapper userMapper;
+    private PasswordEncoder passwordEncoder;
+
 
     @GetMapping
     public Iterable<UserDto> getAllUsers( @RequestParam(required = false,defaultValue = "",name = "sort") String sort) {
@@ -55,6 +56,7 @@ public class UserController {
         }
 
         var newUser = userMapper.toEntity(user);
+        newUser.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(newUser);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(newUser.getId()).toUri();
         return ResponseEntity.created(uri).body(userMapper.toDto(newUser));
@@ -100,4 +102,5 @@ public class UserController {
 
 
     }
+
 }
