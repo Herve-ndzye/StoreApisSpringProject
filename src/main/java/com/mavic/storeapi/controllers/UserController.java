@@ -1,7 +1,6 @@
 package com.mavic.storeapi.controllers;
 
 import com.mavic.storeapi.dtos.*;
-import com.mavic.storeapi.exceptions.InvalidPasswordException;
 import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
 import jakarta.validation.Valid;
