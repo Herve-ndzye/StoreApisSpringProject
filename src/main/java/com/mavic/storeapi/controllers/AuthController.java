@@ -1,5 +1,7 @@
 package com.mavic.storeapi.controllers;
 
+import com.mavic.storeapi.Services.JwtService;
+import com.mavic.storeapi.dtos.JwtResponse;
 import com.mavic.storeapi.dtos.LoginDto;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -13,9 +15,10 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/auth")
 public class AuthController {
     private AuthenticationManager authenticationManager;
+    private JwtService jwtService;
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(
+    public ResponseEntity<JwtResponse> login(
             @RequestBody LoginDto request
     ){
         authenticationManager.authenticate(
@@ -24,7 +27,8 @@ public class AuthController {
                         request.getPassword())
         );
 
-        return ResponseEntity.ok().build();
+        var token = jwtService.generateToken(request.getEmail());
+        return ResponseEntity.ok(new JwtResponse(token));
     }
 
     @ExceptionHandler(BadCredentialsException.class)
