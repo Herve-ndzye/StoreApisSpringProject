@@ -21,4 +21,5 @@ public class UserService implements UserDetailsService {
 
         return new User(user.getName(),user.getPassword(), Collections.emptyList());
     }
+
 }
