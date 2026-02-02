@@ -1,35 +1,37 @@
 package com.mavic.storeapi.Services;
 
+import com.mavic.storeapi.config.JwtConfig;
 import com.mavic.storeapi.entities.User;
-import com.mavic.storeapi.repositories.UserRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
 
+@AllArgsConstructor
 @Service
 public class JwtService {
-    @Value("${spring.jwt.secret}")
-    private String secret;
-    private final UserRepository userRepository;
 
-    public JwtService(UserRepository userRepository) {
-        this.userRepository = userRepository;
+    private JwtConfig jwtConfig;
+
+    public String generateAccessToken(User user){
+        return generateToken(user, jwtConfig.getAccessTokenExpiration());
     }
 
-    public String generateToken(User user){
+    public String generateRefreshToken(User user){
+        return generateToken(user, jwtConfig.getRefreshTokenExpiration());
+    }
+    private String generateToken(User user, long tokenExpiration) {
         return Jwts.builder()
                 .subject(user.getId().toString())
-                .claim("Username",user.getName())
-                .claim("User Email",user.getEmail())
+                .claim("Username", user.getName())
+                .claim("User Email", user.getEmail())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis()+1000 * 86400))
-                .signWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .expiration(new Date(System.currentTimeMillis() + tokenExpiration))
+                .signWith(jwtConfig.getSecret())
                 .compact();
     }
 
@@ -44,7 +46,7 @@ public class JwtService {
 
     private Claims getClaims(String token) {
         return Jwts.parser()
-                .verifyWith(Keys.hmacShaKeyFor(secret.getBytes()))
+                .verifyWith(jwtConfig.getSecret())
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

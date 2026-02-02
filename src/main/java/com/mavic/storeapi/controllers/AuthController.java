@@ -2,17 +2,19 @@ package com.mavic.storeapi.controllers;
 
 import com.mavic.storeapi.Services.JwtService;
 import com.mavic.storeapi.Services.UserService;
+import com.mavic.storeapi.config.JwtConfig;
 import com.mavic.storeapi.dtos.JwtResponse;
 import com.mavic.storeapi.dtos.LoginDto;
 import com.mavic.storeapi.dtos.UserDto;
 import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,10 +27,12 @@ public class AuthController {
     private final UserMapper userMapper;
     private AuthenticationManager authenticationManager;
     private JwtService jwtService;
+    private final JwtConfig jwtConfig;
 
     @PostMapping("/login")
     public ResponseEntity<JwtResponse> login(
-            @RequestBody LoginDto request
+            @RequestBody LoginDto request,
+            HttpServletResponse response
     ){
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
@@ -37,7 +41,16 @@ public class AuthController {
         );
 
         var user = userRepository.getUserByEmail(request.getEmail()).orElseThrow();
-        var token = jwtService.generateToken(user);
+        var token = jwtService.generateAccessToken(user);
+        var refreshToken = jwtService.generateRefreshToken(user);
+
+        var cookie = new Cookie("refreshToken",refreshToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/auth/refresh");
+        cookie.setMaxAge(jwtConfig.getRefreshTokenExpiration());
+        cookie.setSecure(true);
+        response.addCookie(cookie);
+
         return ResponseEntity.ok(new JwtResponse(token));
     }
 
