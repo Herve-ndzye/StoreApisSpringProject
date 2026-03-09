@@ -1,6 +1,7 @@
 package com.mavic.storeapi.Services;
 
 import com.mavic.storeapi.config.JwtConfig;
+import com.mavic.storeapi.entities.Role;
 import com.mavic.storeapi.entities.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
@@ -17,32 +18,27 @@ public class JwtService {
 
     private JwtConfig jwtConfig;
 
-    public String generateAccessToken(User user){
+    public Jwt generateAccessToken(User user){
         return generateToken(user, jwtConfig.getAccessTokenExpiration());
     }
 
-    public String generateRefreshToken(User user){
+    public Jwt generateRefreshToken(User user){
         return generateToken(user, jwtConfig.getRefreshTokenExpiration());
     }
-    private String generateToken(User user, long tokenExpiration) {
-        return Jwts.builder()
+    private Jwt generateToken(User user, long tokenExpiration) {
+
+        var claims = Jwts.claims()
                 .subject(user.getId().toString())
-                .claim("Username", user.getName())
-                .claim("User Email", user.getEmail())
+                .add("Username", user.getName())
+                .add("Email", user.getEmail())
+                .add("Role", user.getRole().toString())
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + tokenExpiration))
-                .signWith(jwtConfig.getSecret())
-                .compact();
+                .expiration(new Date(System.currentTimeMillis() + 1000 * tokenExpiration))
+                .build();
+
+        return new Jwt(claims, jwtConfig.getSecret());
     }
 
-    public boolean validateToken(String token){
-        try{
-            var claims = getClaims(token);
-            return claims.getExpiration().after(new Date());
-        }catch(JwtException  e){
-            return false;
-        }
-    }
 
     private Claims getClaims(String token) {
         return Jwts.parser()
@@ -51,8 +47,14 @@ public class JwtService {
                 .parseSignedClaims(token)
                 .getPayload();
     }
-    public  Long getUserIdFromToken(String token){
-        return  Long.valueOf(getClaims(token).getSubject());
+
+    public Jwt parseToken(String token){
+        try{
+            var claims = getClaims(token);
+            return new Jwt(claims, jwtConfig.getSecret());
+        }catch (JwtException e){
+            return null;
+        }
     }
 
 }
