@@ -1,6 +1,7 @@
 package com.mavic.storeapi.controllers;
 
 import com.mavic.storeapi.dtos.*;
+import com.mavic.storeapi.entities.Role;
 import com.mavic.storeapi.mappers.UserMapper;
 import com.mavic.storeapi.repositories.UserRepository;
 import jakarta.validation.Valid;
@@ -56,6 +57,7 @@ public class UserController {
 
         var newUser = userMapper.toEntity(user);
         newUser.setPassword(passwordEncoder.encode(user.getPassword()));
+        newUser.setRole(Role.USER);
         userRepository.save(newUser);
         var uri = uriBuilder.path("/users/{id}").buildAndExpand(newUser.getId()).toUri();
         return ResponseEntity.created(uri).body(userMapper.toDto(newUser));
