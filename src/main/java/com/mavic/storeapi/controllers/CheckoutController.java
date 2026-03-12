@@ -4,6 +4,7 @@ import com.mavic.storeapi.Services.AuthService;
 import com.mavic.storeapi.Services.CartService;
 import com.mavic.storeapi.dtos.CheckoutRequest;
 import com.mavic.storeapi.dtos.CheckoutResponse;
+import com.mavic.storeapi.dtos.ErrorDto;
 import com.mavic.storeapi.entities.Order;
 import com.mavic.storeapi.entities.OrderItem;
 import com.mavic.storeapi.entities.OrderStatus;
@@ -38,12 +39,12 @@ public class CheckoutController {
         var cart = cartRepository.getCartWithItems(request.getCartId()).orElse(null);
         if(cart == null) {
             return ResponseEntity.badRequest().body(
-                    Map.of("Error","Cart not found.")
+                    new ErrorDto("Cart not found")
             );
         }
         else if(cart.getCartItems().isEmpty()){
             return ResponseEntity.badRequest().body(
-                    Map.of("Error","Cart is empty.")
+                    new ErrorDto("Cart items not found")
             );
         }
         var order = new Order();
