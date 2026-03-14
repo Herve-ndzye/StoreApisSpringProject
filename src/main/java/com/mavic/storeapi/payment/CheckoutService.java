@@ -1,13 +1,13 @@
 package com.mavic.storeapi.payment;
 
-import com.mavic.storeapi.Services.AuthService;
-import com.mavic.storeapi.Services.CartService;
-import com.mavic.storeapi.dtos.ErrorDto;
-import com.mavic.storeapi.entities.Order;
-import com.mavic.storeapi.exceptions.CartEmptyException;
-import com.mavic.storeapi.exceptions.CartNotFoundException;
-import com.mavic.storeapi.repositories.CartRepository;
-import com.mavic.storeapi.repositories.OrderRepository;
+import com.mavic.storeapi.auth.AuthService;
+import com.mavic.storeapi.carts.CartService;
+import com.mavic.storeapi.common.ErrorDto;
+import com.mavic.storeapi.orders.Order;
+import com.mavic.storeapi.carts.CartEmptyException;
+import com.mavic.storeapi.carts.CartNotFoundException;
+import com.mavic.storeapi.carts.CartRepository;
+import com.mavic.storeapi.orders.OrderRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,8 +1,8 @@
 package com.mavic.storeapi.payment;
 
-import com.mavic.storeapi.entities.Order;
-import com.mavic.storeapi.entities.OrderItem;
-import com.mavic.storeapi.entities.PaymentStatus;
+import com.mavic.storeapi.orders.Order;
+import com.mavic.storeapi.orders.OrderItem;
+import com.mavic.storeapi.orders.PaymentStatus;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;

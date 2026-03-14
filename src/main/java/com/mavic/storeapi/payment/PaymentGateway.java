@@ -1,6 +1,6 @@
 package com.mavic.storeapi.payment;
 
-import com.mavic.storeapi.entities.Order;
+import com.mavic.storeapi.orders.Order;
 
 import java.util.Optional;
 

@@ -1,6 +1,6 @@
 package com.mavic.storeapi.payment;
 
-import com.mavic.storeapi.entities.PaymentStatus;
+import com.mavic.storeapi.orders.PaymentStatus;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
