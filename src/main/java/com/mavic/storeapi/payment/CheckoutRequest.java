@@ -1,4 +1,4 @@
-package com.mavic.storeapi.dtos;
+package com.mavic.storeapi.payment;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;

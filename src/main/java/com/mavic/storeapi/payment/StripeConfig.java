@@ -1,4 +1,4 @@
-package com.mavic.storeapi.config;
+package com.mavic.storeapi.payment;
 
 import com.stripe.Stripe;
 import jakarta.annotation.PostConstruct;

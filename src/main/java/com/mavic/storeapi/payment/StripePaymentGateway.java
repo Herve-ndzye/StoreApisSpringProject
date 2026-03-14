@@ -1,9 +1,8 @@
-package com.mavic.storeapi.Services;
+package com.mavic.storeapi.payment;
 
 import com.mavic.storeapi.entities.Order;
 import com.mavic.storeapi.entities.OrderItem;
 import com.mavic.storeapi.entities.PaymentStatus;
-import com.mavic.storeapi.exceptions.PaymentException;
 import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
 import com.stripe.model.Event;
@@ -12,7 +11,6 @@ import com.stripe.model.checkout.Session;
 import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -56,7 +54,7 @@ public class StripePaymentGateway implements PaymentGateway {
     public Optional<PaymentResult> parseWebhookRequest(WebhookRequest request) {
         try {
             var payload = request.getPayload();
-            var signature = request.getHeaders().get("stripe-signature");
+            var signature = request.getHeaders().get("Stripe-Signature");
             var event = Webhook.constructEvent(payload,signature,webhookKey);
 
             return switch (event.getType()) {

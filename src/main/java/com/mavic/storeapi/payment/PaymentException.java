@@ -1,4 +1,4 @@
-package com.mavic.storeapi.exceptions;
+package com.mavic.storeapi.payment;
 
 import lombok.NoArgsConstructor;
 

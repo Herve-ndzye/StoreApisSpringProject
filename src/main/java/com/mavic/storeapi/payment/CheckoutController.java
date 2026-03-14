@@ -1,16 +1,11 @@
-package com.mavic.storeapi.controllers;
+package com.mavic.storeapi.payment;
 
-import com.mavic.storeapi.Services.CheckoutService;
-import com.mavic.storeapi.Services.WebhookRequest;
-import com.mavic.storeapi.dtos.CheckoutRequest;
 import com.mavic.storeapi.dtos.ErrorDto;
 import com.mavic.storeapi.exceptions.CartEmptyException;
 import com.mavic.storeapi.exceptions.CartNotFoundException;
-import com.mavic.storeapi.exceptions.PaymentException;
 import com.mavic.storeapi.repositories.OrderRepository;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

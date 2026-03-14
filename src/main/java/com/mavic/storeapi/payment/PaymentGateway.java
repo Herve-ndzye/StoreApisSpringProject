@@ -1,4 +1,4 @@
-package com.mavic.storeapi.Services;
+package com.mavic.storeapi.payment;
 
 import com.mavic.storeapi.entities.Order;
 

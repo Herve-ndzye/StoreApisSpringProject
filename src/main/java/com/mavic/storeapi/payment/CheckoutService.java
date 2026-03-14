@@ -1,18 +1,13 @@
-package com.mavic.storeapi.Services;
+package com.mavic.storeapi.payment;
 
-import com.mavic.storeapi.dtos.CheckoutRequest;
-import com.mavic.storeapi.dtos.CheckoutResponse;
+import com.mavic.storeapi.Services.AuthService;
+import com.mavic.storeapi.Services.CartService;
 import com.mavic.storeapi.dtos.ErrorDto;
 import com.mavic.storeapi.entities.Order;
-import com.mavic.storeapi.entities.PaymentStatus;
 import com.mavic.storeapi.exceptions.CartEmptyException;
 import com.mavic.storeapi.exceptions.CartNotFoundException;
-import com.mavic.storeapi.exceptions.PaymentException;
 import com.mavic.storeapi.repositories.CartRepository;
 import com.mavic.storeapi.repositories.OrderRepository;
-import com.stripe.exception.SignatureVerificationException;
-import com.stripe.model.PaymentIntent;
-import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
