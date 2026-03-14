@@ -35,7 +35,7 @@ public class StripePaymentGateway implements PaymentGateway {
                     .putMetadata("order_id", order.getId().toString());
 
             order.getItems().forEach(item -> {
-                var lineItem = createLineItem(item, item.getUnitPrice());
+                var lineItem = createLineItem(item, item.getUnitPrice().multiply(BigDecimal.valueOf(100)));
                 builder.addLineItem(lineItem);
             });
 
