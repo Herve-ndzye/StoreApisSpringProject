@@ -1,6 +1,6 @@
 package com.mavic.storeapi.entities;
 
-public enum OrderStatus {
+public enum PaymentStatus {
     PENDING,
     FAILED,
     PAID,

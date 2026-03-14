@@ -1,11 +1,8 @@
 package com.mavic.storeapi.entities;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.annotations.ColumnDefault;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -28,7 +25,7 @@ public class Order {
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private OrderStatus status;
+    private PaymentStatus status;
 
     @Column(name = "created_at",insertable = false,updatable = false)
     private LocalDateTime createdAt;
@@ -45,7 +42,7 @@ public class Order {
         order.setTotalPrice(
                 cart.getTotalPrice().multiply(BigDecimal.valueOf(100))
         );
-        order.setStatus(OrderStatus.PENDING);
+        order.setStatus(PaymentStatus.PENDING);
 
         cart.getCartItems().forEach(cartItem -> {
             var orderItem = new OrderItem(order,cartItem.getProduct(),cartItem.getQuantity());

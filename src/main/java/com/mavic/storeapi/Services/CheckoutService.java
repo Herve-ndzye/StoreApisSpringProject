@@ -4,23 +4,21 @@ import com.mavic.storeapi.dtos.CheckoutRequest;
 import com.mavic.storeapi.dtos.CheckoutResponse;
 import com.mavic.storeapi.dtos.ErrorDto;
 import com.mavic.storeapi.entities.Order;
+import com.mavic.storeapi.entities.PaymentStatus;
 import com.mavic.storeapi.exceptions.CartEmptyException;
 import com.mavic.storeapi.exceptions.CartNotFoundException;
 import com.mavic.storeapi.exceptions.PaymentException;
 import com.mavic.storeapi.repositories.CartRepository;
 import com.mavic.storeapi.repositories.OrderRepository;
-import com.stripe.exception.StripeException;
-import com.stripe.model.checkout.Session;
-import com.stripe.param.checkout.SessionCreateParams;
-import lombok.AllArgsConstructor;
+import com.stripe.exception.SignatureVerificationException;
+import com.stripe.model.PaymentIntent;
+import com.stripe.net.Webhook;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 
 @RequiredArgsConstructor
 @Service
@@ -53,5 +51,22 @@ public class CheckoutService {
             orderRepository.delete(order);
             throw e;
         }
+    }
+
+    public void handleWebhookEvent(WebhookRequest request){
+        paymentGateway
+                .parseWebhookRequest(request)
+                .ifPresent(
+                        paymentResult -> {
+                            var order = orderRepository.findById(paymentResult.getOrderId()).orElseThrow();
+                            order.setStatus(paymentResult.getPaymentStatus());
+                            orderRepository.save(order);
+                        }
+                );
+    }
+
+    @ExceptionHandler(PaymentException.class)
+    public ResponseEntity<ErrorDto> handlePaymentException(PaymentException e){
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(new ErrorDto(e.getMessage()));
     }
 }

@@ -2,15 +2,22 @@ package com.mavic.storeapi.Services;
 
 import com.mavic.storeapi.entities.Order;
 import com.mavic.storeapi.entities.OrderItem;
+import com.mavic.storeapi.entities.PaymentStatus;
 import com.mavic.storeapi.exceptions.PaymentException;
+import com.stripe.exception.SignatureVerificationException;
 import com.stripe.exception.StripeException;
+import com.stripe.model.Event;
+import com.stripe.model.PaymentIntent;
 import com.stripe.model.checkout.Session;
+import com.stripe.net.Webhook;
 import com.stripe.param.checkout.SessionCreateParams;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.Optional;
 
 @Service
 public class StripePaymentGateway implements PaymentGateway {
@@ -18,6 +25,9 @@ public class StripePaymentGateway implements PaymentGateway {
 
     @Value("${websiteUrl}")
     private String websiteUrl;
+
+    @Value("${stripe.webhookSecretKey}")
+    private String webhookKey;
 
     @Override
     public CheckoutSession createCheckoutSession(Order order) {
@@ -40,6 +50,33 @@ public class StripePaymentGateway implements PaymentGateway {
             System.out.println(e.getMessage());
             throw new PaymentException();
         }
+    }
+
+    @Override
+    public Optional<PaymentResult> parseWebhookRequest(WebhookRequest request) {
+        try {
+            var payload = request.getPayload();
+            var signature = request.getHeaders().get("stripe-signature");
+            var event = Webhook.constructEvent(payload,signature,webhookKey);
+
+            return switch (event.getType()) {
+                case "payment_intent.succeeded"->
+                    Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.PAID));
+                case "payment_intent.failed"->
+                    Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.FAILED));
+                default -> Optional.empty();
+            };
+        } catch (SignatureVerificationException e) {
+            throw new PaymentException("Invalid Signature");
+        }
+    }
+
+    private Long extractOrderId(Event event){
+        var stripeObject = event.getDataObjectDeserializer().getObject().orElseThrow(
+                () -> new PaymentException("Could not deserialize event data object.Check the SDK and API version")
+        );
+        var paymentIntent = (PaymentIntent) stripeObject;
+        return Long.valueOf(paymentIntent.getMetadata().get("order_id"));
     }
 
     private static SessionCreateParams.LineItem createLineItem(OrderItem item, BigDecimal unitAmountUsd) {
