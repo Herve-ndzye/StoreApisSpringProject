@@ -14,12 +14,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.util.Optional;
 
 @Service
 public class StripePaymentGateway implements PaymentGateway {
-    BigDecimal exchangeRate = BigDecimal.valueOf(1513.7);
 
     @Value("${websiteUrl}")
     private String websiteUrl;
@@ -29,22 +27,20 @@ public class StripePaymentGateway implements PaymentGateway {
 
     @Override
     public CheckoutSession createCheckoutSession(Order order) {
-        try{
+        try {
             var builder = SessionCreateParams.builder()
                     .setMode(SessionCreateParams.Mode.PAYMENT)
                     .setSuccessUrl(websiteUrl + "/checkout-success?orderId=" + order.getId())
                     .setCancelUrl(websiteUrl + "/checkout-cancel")
-                    .putMetadata("order_id",order.getId().toString());
+                    .putMetadata("order_id", order.getId().toString());
+
             order.getItems().forEach(item -> {
-                BigDecimal unitAmountUsd = item.getUnitPrice()
-                        .divide(exchangeRate, 2, RoundingMode.HALF_UP)
-                        .multiply(BigDecimal.valueOf(100)
-                        );
-                var lineItem = createLineItem(item, unitAmountUsd);
+                var lineItem = createLineItem(item, item.getUnitPrice());
                 builder.addLineItem(lineItem);
             });
+
             return new CheckoutSession(Session.create(builder.build()).getUrl());
-        }catch(StripeException e){
+        } catch (StripeException e) {
             System.out.println(e.getMessage());
             throw new PaymentException();
         }
@@ -55,13 +51,13 @@ public class StripePaymentGateway implements PaymentGateway {
         try {
             var payload = request.getPayload();
             var signature = request.getHeaders().get("Stripe-Signature");
-            var event = Webhook.constructEvent(payload,signature,webhookKey);
+            var event = Webhook.constructEvent(payload, signature, webhookKey);
 
             return switch (event.getType()) {
-                case "payment_intent.succeeded"->
-                    Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.PAID));
-                case "payment_intent.failed"->
-                    Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.FAILED));
+                case "payment_intent.succeeded" ->
+                        Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.PAID));
+                case "payment_intent.failed" ->
+                        Optional.of(new PaymentResult(extractOrderId(event), PaymentStatus.FAILED));
                 default -> Optional.empty();
             };
         } catch (SignatureVerificationException e) {
@@ -69,9 +65,9 @@ public class StripePaymentGateway implements PaymentGateway {
         }
     }
 
-    private Long extractOrderId(Event event){
+    private Long extractOrderId(Event event) {
         var stripeObject = event.getDataObjectDeserializer().getObject().orElseThrow(
-                () -> new PaymentException("Could not deserialize event data object.Check the SDK and API version")
+                () -> new PaymentException("Could not deserialize event data object. Check the SDK and API version")
         );
         var paymentIntent = (PaymentIntent) stripeObject;
         return Long.valueOf(paymentIntent.getMetadata().get("order_id"));
